@@ -2,102 +2,48 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<title>轮盘抽奖</title>
+<title>轮盘抽奖管理</title>
 <style>
-  #canvas { width: 400px; height: 400px; }
-  button { margin-top: 10px; }
+body { font-family: Arial, sans-serif; padding: 20px; }
+h1 { margin-bottom: 10px; }
+button { margin: 5px; }
+#disks { margin-top:20px; }
+.disk { border:1px solid #ccc; padding:10px; margin-bottom:10px; }
+#overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+background:rgba(0,0,0,0.5); justify-content:center; align-items:center; }
+#dialog { background:#fff; padding:20px; border-radius:5px; width:400px; }
 </style>
 </head>
 <body>
-<h2>轮盘抽奖</h2>
-<canvas id="canvas" width="400" height="400"></canvas>
-<br/>
-<button id="spinBtn">开始旋转</button>
-<script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let disks = [];
-let currentRotation = 0;
-let isSpinning = false;
 
-// 加载配置
-fetch('disks.json')
-  .then(res => res.json())
-  .then(data => {
-    disks = data; // 轮盘项（数组）
-    drawWheel();
-  });
+<h1>轮盘Dashboard</h1>
+<button id="btnCreate">创建轮盘</button>
 
-// 绘制轮盘
-function drawWheel() {
-  if (!disks || disks.length === 0) return;
-  const total = disks.length;
-  const anglePer = (2 * Math.PI) / total;
-  
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.save();
-  ctx.translate(canvas.width/2, canvas.height/2);
-  ctx.rotate(currentRotation);
-  
-  for (let i=0; i<total; i++) {
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-    ctx.arc(0, 0, 180, i*anglePer, (i+1)*anglePer);
-    ctx.closePath();
-    ctx.fillStyle = `hsl(${i*360/total},70%,50%)`;
-    ctx.fill();
+<div id="disks"></div>
 
-    // 文字
-    ctx.save();
-    ctx.rotate(i*anglePer + anglePer/2);
-    ctx.translate(0, -100);
-    ctx.rotate(Math.PI/2);
-    ctx.fillStyle = 'white';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(disks[i].option, 0, 0);
-    ctx.restore();
-  }
+<!-- 转盘弹窗 -->
+<div id="overlay">
+  <div id="dialog">
+    <h3>What to do...</h3>
+    <canvas id="wheel" width="400" height="400"></canvas>
+    <div style="margin-top:10px; text-align:center;">
+      <button id="btnStart">Start</button>
+    </div>
+  </div>
+</div>
 
-  ctx.restore();
-}
+<!-- 创建/编辑弹窗 -->
+<div id="editOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:20px; border-radius:5px; width:400px;">
+    <h3 id="editTitle">创建轮盘</h3>
+    <label>输入选项（每行一个）:</label><br/>
+    <textarea id="optionInput" rows="6" style="width:100%;"></textarea><br/>
+    <button id="btnSave">保存</button>
+    <button id="btnCancel">取消</button>
+  </div>
+</div>
 
-// 旋转
-function spin() {
-  if (isSpinning || disks.length===0) return;
-  isSpinning = true;
-
-  // 随机抽取一个位置
-  const selectedIndex = Math.floor(Math.random() * disks.length);
-  const total = disks.length;
-  const anglePer = (2 * Math.PI) / total;
-  const targetAngle = (total - selectedIndex) * anglePer + Math.random()*anglePer;
-
-  // 转盘旋转动画
-  const totalTurns = 4 * Math.PI + targetAngle; // 转4圈+目标位置
-  const duration = 4000; // 4秒
-  const startTime = performance.now();
-
-  function animate(now) {
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed/duration, 1);
-    currentRotation = progress * totalTurns;
-    drawWheel();
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      alert('抽中的是：' + disks[selectedIndex].option);
-      isSpinning = false;
-    }
-  }
-
-  requestAnimationFrame(animate);
-}
-
-document.getElementById('spinBtn').onclick = spin;
-
-// 初始绘制（等待加载完配置）
-</script>
+<script type="module" src="./app.js"></script>
 </body>
 </html>
