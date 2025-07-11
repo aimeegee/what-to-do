@@ -8,10 +8,23 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '14'
 
-      - name
+      # 如果你要使用build工具（如React、Vue），可以加入build步骤
+      # 这里假设你的index.html和json文件直接在仓库根目录，不需要额外构建
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./  # 你要部署的目录，假设index.html在仓库根目录
+          publish_branch: gh-pages  # 目标分支，B站等需要改成gh-pages
+          # 如果你用gh-pages分支以外的分支，可以设置为对应分支
