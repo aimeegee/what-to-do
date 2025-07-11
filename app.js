@@ -39,22 +39,6 @@ function hideEditDialog() {
   editOverlay.style.display = "none";
 }
 
-// 保存到 localStorage
-function saveToStorage() {
-  localStorage.setItem("disks", JSON.stringify(disks));
-}
-
-// 从 localStorage 加载
-function loadFromStorage() {
-  const data = localStorage.getItem("disks");
-  if (data) {
-    const arr = JSON.parse(data);
-    if (Array.isArray(arr)) {
-      disks.splice(0, disks.length, ...arr);
-    }
-  }
-}
-
 // 渲染轮盘列表
 function renderDisks() {
   disksDiv.innerHTML = "";
@@ -186,6 +170,32 @@ function drawWheel(options, rotation = 0) {
     ctx.fillText(options[i], radius * 0.7, 8);
     ctx.restore();
   }
+}
+
+// 保存到后端
+function saveToStorage() {
+  fetch("/api/disks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(disks),
+  }).then((res) => {
+    if (!res.ok) alert("保存失败！");
+  });
+}
+
+// 从后端加载
+function loadFromStorage() {
+  fetch("/api/disks")
+    .then((res) => res.json())
+    .then((arr) => {
+      if (Array.isArray(arr)) {
+        disks.splice(0, disks.length, ...arr);
+        renderDisks();
+      }
+    })
+    .catch(() => {
+      alert("无法连接后端，数据加载失败！");
+    });
 }
 
 // 事件绑定
