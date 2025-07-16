@@ -12,6 +12,7 @@ const disksDiv = document.getElementById("disks");
 const editOverlay = document.getElementById("editOverlay");
 const editTitle = document.getElementById("editTitle");
 const optionInput = document.getElementById("optionInput");
+const diskNameInput = document.getElementById("diskNameInput");
 const btnSave = document.getElementById("btnSave");
 const btnCancel = document.getElementById("btnCancel");
 const btnStart = document.getElementById("btnStart");
@@ -31,6 +32,7 @@ function showCreateDialog() {
 function showEditDialog(title) {
   editTitle.innerText = title;
   optionInput.value = "";
+  diskNameInput.value = "";
   editOverlay.style.display = "flex";
 }
 
@@ -62,6 +64,7 @@ function renderDisks() {
 // 保存轮盘（新增或编辑）
 function saveDisk() {
   const txt = optionInput.value.trim();
+  const diskName = diskNameInput.value.trim() || `轮盘${disks.length + 1}`;
   if (!txt) {
     alert("请填写内容");
     return;
@@ -75,9 +78,10 @@ function saveDisk() {
     return;
   }
   if (currentDiskIndex === null) {
-    disks.push({ name: "轮盘" + (disks.length + 1), options: options });
+    disks.push({ name: diskName, options: options });
   } else {
     disks[currentDiskIndex].options = options;
+    disks[currentDiskIndex].name = diskName;
   }
   saveToStorage();
   renderDisks();
@@ -97,6 +101,7 @@ function editDisk(index) {
   currentDiskIndex = index;
   showEditDialog("编辑轮盘");
   optionInput.value = disks[index].options.join("\n");
+  diskNameInput.value = disks[index].name;
 }
 
 // 删除轮盘
